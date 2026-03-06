@@ -1,16 +1,19 @@
-# aplikasigym
+# Aplikasi Gym FT UMJ
 
-A new Flutter project.
+Aplikasi Gym FT UMJ berbasis Flutter yang menggunakan algoritma decision tree regression untuk memberikan rekomendasi nutrisi dan aktivitas fisik.
 
-## Getting Started
+## Fitur Aplikasi
+- Login dan Register pengguna
+- Dashboard aktivitas gym
+- Rekomendasi latihan
+- Statistik aktivitas
+- Scan QR
+- Panduan latihan
 
-This project is a starting point for a Flutter application.
+## Teknologi
+- Flutter
+- Firebase
+- Decision Tree Regression
 
-A few resources to get you started if this is your first Flutter project:
-
-- [Lab: Write your first Flutter app](https://docs.flutter.dev/get-started/codelab)
-- [Cookbook: Useful Flutter samples](https://docs.flutter.dev/cookbook)
-
-For help getting started with Flutter development, view the
-[online documentation](https://docs.flutter.dev/), which offers tutorials,
-samples, guidance on mobile development, and a full API reference.
+## Developer
+Fariz Shakim
