@@ -17,3 +17,7 @@ Aplikasi Gym FT UMJ berbasis Flutter yang menggunakan algoritma decision tree re
 
 ## Developer
 Fariz Shakim
+
+## Download Aplikasi
+
+[Download APK](https://github.com/Farizshakim14/aplikasigymFTUMJ/releases)
