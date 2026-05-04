@@ -2,6 +2,8 @@ import 'dart:ui';
 import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_database/firebase_database.dart';
+import 'package:flutter/services.dart';
+import 'dart:convert';
 
 class RekomendasiAIPage extends StatefulWidget {
   const RekomendasiAIPage({super.key});
@@ -74,6 +76,12 @@ class _RekomendasiAIPageState extends State<RekomendasiAIPage>
     }
   }
 
+Future<List<dynamic>> loadDataset() async {
+  String jsonString =
+      await rootBundle.loadString('assets/dataset.json');
+  return json.decode(jsonString);
+}
+
   Future<void> _prosesAI() async {
     final nama = _nama.text;
     final usia = int.tryParse(_usia.text) ?? 0;
@@ -86,33 +94,46 @@ class _RekomendasiAIPageState extends State<RekomendasiAIPage>
       return;
     }
 
-    setState(() => _loading = true);
+   setState(() => _loading = true);
 
-    await Future.delayed(const Duration(seconds: 2));
+await Future.delayed(const Duration(seconds: 2));
 
-    final bmiVal = bb / ((tb / 100) * (tb / 100));
-    _setBMIResult(bmiVal);
+final bmiVal = bb / ((tb / 100) * (tb / 100));
+_setBMIResult(bmiVal);
 
-    final gizi = hitungGizi(bb, tb, _jk, _tujuan);
-    final aktivitas = rekomendasiGym(_tujuan, _jk);
+final gizi = hitungGizi(bb, tb, _jk, _tujuan);
 
-    final user = FirebaseAuth.instance.currentUser;
-    if (user != null) {
-      final ref =
-          FirebaseDatabase.instance.ref("history/${user.uid}").push();
-      await ref.set({
-        "nama": nama,
-        "bb": bb,
-        "tb": tb,
-        "usia": usia,
-        "tujuan": _tujuan,
-        "bmi": bmiVal,
-        "tanggal": DateTime.now().toString()
-      });
-    }
+final dataset = await loadDataset();
 
-    setState(() {
-      _hasilGizi = """
+int goalUser =
+    _tujuan == "bulking" ? 2 :
+    _tujuan == "cutting" ? 1 : 3;
+
+var hasilData = dataset
+    .where((item) => item['Goal'] == goalUser)
+    .toList();
+
+var aktivitas = hasilData.isNotEmpty
+    ? "Durasi Workout: ${hasilData[0]['Workout']} menit"
+    : "Program tidak ditemukan";
+    
+final user = FirebaseAuth.instance.currentUser;
+if (user != null) {
+  final ref =
+      FirebaseDatabase.instance.ref("history/${user.uid}").push();
+  await ref.set({
+    "nama": nama,
+    "bb": bb,
+    "tb": tb,
+    "usia": usia,
+    "tujuan": _tujuan,
+    "bmi": bmiVal,
+    "tanggal": DateTime.now().toString()
+  });
+}
+
+setState(() {
+  _hasilGizi = """
 Kalori: ${gizi["Kalori"]!.toStringAsFixed(0)} kkal
 Protein: ${gizi["Protein"]!.toStringAsFixed(1)} g
 Karbohidrat: ${gizi["Karbohidrat"]!.toStringAsFixed(1)} g
@@ -120,10 +141,10 @@ Lemak: ${gizi["Lemak"]!.toStringAsFixed(1)} g
 Serat: ${gizi["Serat"]!.toStringAsFixed(1)} g
 """;
 
-      _hasilProgram = aktivitas;
-      _loading = false;
-      _anim.forward(from: 0);
-    });
+    _hasilProgram = aktivitas.toString(); // 🔥 penting pakai toString()
+    _loading = false;
+    _anim.forward(from: 0);
+  });
   }
 
   void _setBMIResult(double bmi) {
@@ -395,57 +416,74 @@ Serat: ${gizi["Serat"]!.toStringAsFixed(1)} g
 }
 
 /// ================= LOGIKA =================
-Map<String, double> hitungGizi(double bb, double tb, String jk, String tujuan) {
-  double bmr = jk == "L"
-      ? 88.36 + (13.4 * bb) + (4.8 * tb) - (5.7 * 25)
-      : 447.6 + (9.2 * bb) + (3.1 * tb) - (4.3 * 25);
+double prediksiKalori(
+  double bb,
+  double tb,
+  String jk,
+  String tujuan,
+) {
+  double bmi = bb / ((tb / 100) * (tb / 100));
+  int gender = jk == "L" ? 1 : 0;
 
-  double kalori;
-
-  if (tujuan == "bulking") {
-    kalori = bmr * 1.2 + 500;
-  } else if (tujuan == "cutting") {
-    kalori = bmr * 1.2 - 300;
+  if (bb <= 110.5) {
+    if (bb <= 87.5) {
+      if (tb <= 172.5) {
+        if (bb <= 73) {
+          return gender == 0 ? 1726 : 1883;
+        } else {
+          return bmi <= 42.7 ? 2110 : 2445;
+        }
+      } else {
+        return gender == 0 ? 2217 : 2549;
+      }
+    } else {
+      return gender == 0 ? 2500 : 2850;
+    }
   } else {
-    kalori = bmr * 1.2;
+    return gender == 0 ? 3400 : 3900;
   }
+}
+
+Map<String, double> hitungGizi(
+  double bb,
+  double tb,
+  String jk,
+  String tujuan,
+) {
+  double kalori = prediksiKalori(bb, tb, jk, tujuan);
+
+  double protein =
+      tujuan == "cutting"
+          ? bb * 2.2
+          : tujuan == "bulking"
+              ? bb * 2.0
+              : bb * 1.8;
+
+  double lemak =
+      tujuan == "cutting"
+          ? bb * 0.8
+          : tujuan == "bulking"
+              ? bb * 1.0
+              : bb * 0.9;
+
+  double sisa = kalori - ((protein * 4) + (lemak * 9));
+  double karbo = sisa / 4;
 
   return {
     "Kalori": kalori,
-    "Protein": bb *
-        (tujuan == "bulking"
-            ? 2
-            : tujuan == "cutting"
-                ? 1.5
-                : 1.7),
-    "Karbohidrat": bb *
-        (tujuan == "bulking"
-            ? 5
-            : tujuan == "cutting"
-                ? 3
-                : 4),
-    "Lemak": bb *
-        (tujuan == "bulking"
-            ? 1
-            : tujuan == "cutting"
-                ? 0.8
-                : 0.9),
+    "Protein": protein,
+    "Karbohidrat": karbo,
+    "Lemak": lemak,
     "Serat": 25,
   };
 }
 
 String rekomendasiGym(String tujuan, String jk) {
-  if (tujuan == "bulking") {
-    return jk == "L"
-        ? "Bulking Male: Dada, Punggung, Kaki, Bahu"
-        : "Bulking Female: Glutes, Legs, Upper Body";
-  } else if (tujuan == "cutting") {
-    return jk == "L"
-        ? "Cutting Male: HIIT, Core, Cardio"
-        : "Cutting Female: Cardio, Core, Glutes";
+  if (tujuan == "cutting") {
+    return "Aktivitas 60 menit/hari\nCardio + HIIT";
+  } else if (tujuan == "bulking") {
+    return "Aktivitas 45 menit/hari\nWeight Training";
   }
 
-  return jk == "L"
-      ? "Maintain Male: Full Body Workout 3-4x / Cardio Ringan"
-      : "Maintain Female: Full Body Workout + Cardio Santai";
+  return "Aktivitas 30 menit/hari\nFull Body Workout";
 }
