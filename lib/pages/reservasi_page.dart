@@ -183,16 +183,13 @@ class _ReservasiPageState extends State<ReservasiPage> {
         return;
       }
 
-      await targetSlot.update({
-        "remaining": remaining - 1
-      });
-
       await userBookingRef.push().set({
 
         "user_id": user.uid,
         "user_name": userName,
         "gym_date": dateKey,
         "sesi": _sesi,
+        "status": "Pending",
         "created_at": DateTime.now().toIso8601String()
 
       });
