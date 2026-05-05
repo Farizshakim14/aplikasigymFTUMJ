@@ -68,10 +68,12 @@ class _ReservasiPageState extends State<ReservasiPage> {
           await FirebaseDatabase.instance.ref("users/${user.uid}").get();
 
       String userName = "-";
+      String userGender = "";
 
       if (userSnap.exists) {
         final data = Map<String, dynamic>.from(userSnap.value as Map);
         userName = data["nama"] ?? "-";
+        userGender = data["jk"] ?? "";
       }
 
       final dateKey = DateFormat('yyyy-MM-dd').format(_tanggal);
@@ -84,6 +86,7 @@ class _ReservasiPageState extends State<ReservasiPage> {
 
       DatabaseReference? targetSlot;
       int remaining = 0;
+      bool isGenderMismatch = false;
 
       if (slotSnap.exists) {
 
@@ -92,20 +95,52 @@ class _ReservasiPageState extends State<ReservasiPage> {
           final data = Map<String, dynamic>.from(slot.value as Map);
 
           final slotTime = normalize("${data["time"]}");
+          final slotGender = "${data["gender"]}";
 
           int sisa =
               int.tryParse("${data["remaining"]}") ??
               int.tryParse("${data["kapasitas"]}") ??
               0;
 
-          if (slotTime == userSessionNormalized && sisa > 0) {
-            targetSlot = slot.ref;
-            remaining = sisa;
-            break;
+          if (slotTime == userSessionNormalized) {
+            if (sisa > 0) {
+              bool isGenderMatch = false;
+              if (slotGender == "Campur") {
+                isGenderMatch = true;
+              } else if (slotGender == "Laki-laki" && userGender == "L") {
+                isGenderMatch = true;
+              } else if (slotGender == "Perempuan" && userGender == "P") {
+                isGenderMatch = true;
+              }
+
+              if (isGenderMatch) {
+                targetSlot = slot.ref;
+                remaining = sisa;
+                break;
+              } else {
+                isGenderMismatch = true;
+              }
+            }
           }
 
         }
 
+      }
+
+      if (isGenderMismatch && targetSlot == null) {
+        if (!mounted) return;
+
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+            content: Text("Sesi ini khusus untuk gender yang berbeda"),
+          ),
+        );
+
+        setState(() {
+          _loading = false;
+        });
+
+        return;
       }
 
       if (targetSlot == null) {
