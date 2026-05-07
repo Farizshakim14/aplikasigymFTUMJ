@@ -167,17 +167,20 @@ Serat: ${gizi["Serat"]!.toStringAsFixed(1)} g
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      extendBodyBehindAppBar: true,
       appBar: AppBar(
-        backgroundColor: Colors.white,
-        elevation: .3,
+        backgroundColor: Colors.transparent,
+        elevation: 0,
         title: const Text(
-          "Rekomendasi Nutrisi dan Aktivitas",
-          style: TextStyle(color: Colors.black),
+          "Rekomendasi",
+          maxLines: 1,
+          overflow: TextOverflow.ellipsis,
+          style: TextStyle(color: Colors.white),
         ),
         centerTitle: true,
-        iconTheme: const IconThemeData(color: Colors.black),
+        iconTheme: const IconThemeData(color: Colors.white),
         leading: IconButton(
-          icon: const Icon(Icons.arrow_back),
+          icon: const Icon(Icons.arrow_back, color: Colors.white),
           onPressed: () {
             Navigator.pushReplacementNamed(context, "/dashboard");
           },
@@ -210,10 +213,12 @@ Serat: ${gizi["Serat"]!.toStringAsFixed(1)} g
           ),
 
           /// CONTENT
-          SingleChildScrollView(
-            padding: const EdgeInsets.all(18),
-            child: Column(
-              children: [
+          SafeArea(
+            child: SingleChildScrollView(
+              // SafeArea mencegah konten ketumpuk dengan AppBar.
+              padding: const EdgeInsets.all(18),
+              child: Column(
+                children: [
                 Container(
                   padding: const EdgeInsets.all(18),
                   decoration: BoxDecoration(
@@ -354,7 +359,8 @@ Serat: ${gizi["Serat"]!.toStringAsFixed(1)} g
                 if (_hasilProgram != null)
                   _resultCard(
                       "Program Gym", _hasilProgram!, Icons.fitness_center),
-              ],
+                ],
+              ),
             ),
           ),
         ],

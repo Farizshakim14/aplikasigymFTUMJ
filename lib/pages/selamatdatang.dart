@@ -91,11 +91,12 @@ class SelamatDatangPage extends StatelessWidget {
                     height: 55,
                     child: ElevatedButton(
                       onPressed: () {
-                        Navigator.pushReplacement(
+                        Navigator.pushAndRemoveUntil(
                           context,
                           MaterialPageRoute(
                             builder: (_) => const DashboardPage(),
                           ),
+                          (route) => false,
                         );
                       },
                       style: ElevatedButton.styleFrom(

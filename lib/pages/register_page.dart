@@ -1,5 +1,6 @@
 import 'dart:ui';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_database/firebase_database.dart';
 
@@ -167,6 +168,7 @@ class _RegisterPageState extends State<RegisterPage> {
                         icon: Icons.badge_outlined,
                         controller: nimCtrl,
                         keyboardType: TextInputType.number,
+                        inputFormatters: [FilteringTextInputFormatter.digitsOnly],
                       ),
                       const SizedBox(height: 14),
 
@@ -241,12 +243,14 @@ class _InputField extends StatelessWidget {
   final IconData icon;
   final TextEditingController controller;
   final TextInputType? keyboardType;
+  final List<TextInputFormatter>? inputFormatters;
 
   const _InputField({
     required this.label,
     required this.icon,
     required this.controller,
     this.keyboardType,
+    this.inputFormatters,
   });
 
   @override
@@ -261,6 +265,7 @@ class _InputField extends StatelessWidget {
       child: TextField(
         controller: controller,
         keyboardType: keyboardType,
+        inputFormatters: inputFormatters,
         decoration: InputDecoration(
           icon: Icon(icon),
           hintText: label,

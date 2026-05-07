@@ -57,15 +57,19 @@ class _RiwayatAktivitasPageState extends State<RiwayatAktivitasPage> {
             children: [
 
               // ===== FILTER BUTTONS =====
-              Padding(
-                padding: const EdgeInsets.all(10),
-                child: Wrap(
-                  spacing: 8,
+              SingleChildScrollView(
+                scrollDirection: Axis.horizontal,
+                padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
+                child: Row(
                   children: [
                     _chip("all", "Semua"),
+                    const SizedBox(width: 8),
                     _chip("booking", "Booking"),
+                    const SizedBox(width: 8),
                     _chip("absensi", "Absensi"),
-                    _chip("ai", "AI"),
+                    const SizedBox(width: 8),
+                    _chip("ai", "Rekomendasi"),
+                    const SizedBox(width: 8),
                     _chip("program", "Program"),
                   ],
                 ),

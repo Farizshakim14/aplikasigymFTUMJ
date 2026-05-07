@@ -26,6 +26,22 @@ class _AbsensiPageState extends State<AbsensiPage> {
   String get formattedTime =>
       "${selectedTime.hour.toString().padLeft(2, '0')}:${selectedTime.minute.toString().padLeft(2, '0')}";
 
+  bool _isGymDateToday(dynamic gymDate) {
+    if (gymDate == null) return false;
+    final today = DateTime.now();
+    final todayStr = DateFormat('yyyy-MM-dd').format(today);
+    final s = gymDate.toString();
+
+    // Fast path: if stored as "yyyy-MM-dd" or starts with it.
+    if (s == todayStr || s.startsWith(todayStr)) return true;
+
+    // Fallback: if stored with time / ISO timestamp.
+    final dt = DateTime.tryParse(s);
+    if (dt == null) return false;
+
+    return dt.year == today.year && dt.month == today.month && dt.day == today.day;
+  }
+
   Future<bool> _hasBookingToday() async {
     if (user == null) return false;
 
@@ -33,11 +49,11 @@ class _AbsensiPageState extends State<AbsensiPage> {
     final snap = await ref.get();
     if (!snap.exists) return false;
 
-    final today = DateFormat('yyyy-MM-dd').format(DateTime.now());
+    // Using DateTime matching, not strict string equality.
 
     for (var b in snap.children) {
       final data = Map<String, dynamic>.from(b.value as Map);
-      if (data["gym_date"] == today && data["status"] != "Batal") {
+      if (_isGymDateToday(data["gym_date"]) && data["status"] != "Batal") {
         return true;
       }
     }
@@ -83,15 +99,29 @@ class _AbsensiPageState extends State<AbsensiPage> {
   Future<DatabaseReference?> _getTodayBookingRef() async {
     if (user == null) return null;
 
-    final today = DateFormat("yyyy-MM-dd").format(DateTime.now());
+    // Using DateTime matching, not strict string equality.
     final ref = FirebaseDatabase.instance.ref("bookings/${user!.uid}");
 
-    final snap = await ref.orderByChild("gym_date").equalTo(today).get();
-    if (!snap.exists) return null;
+    // Try to fetch today's bookings; fallback to full scan if the query fails.
+    final todayStr = DateFormat("yyyy-MM-dd").format(DateTime.now());
+    final snap = await ref.orderByChild("gym_date").equalTo(todayStr).get();
+    if (snap.exists) {
+      for (var b in snap.children) {
+        final data = Map<String, dynamic>.from(b.value as Map);
+        if (_isGymDateToday(data["gym_date"]) && data["status"] != "Batal") {
+          return b.ref;
+        }
+      }
+      return null;
+    }
 
-    for (var b in snap.children) {
+    // Fallback: strict query can return empty if gym_date has a different format.
+    final allSnap = await ref.get();
+    if (!allSnap.exists) return null;
+
+    for (var b in allSnap.children) {
       final data = Map<String, dynamic>.from(b.value as Map);
-      if (data["status"] != "Batal") {
+      if (_isGymDateToday(data["gym_date"]) && data["status"] != "Batal") {
         return b.ref;
       }
     }

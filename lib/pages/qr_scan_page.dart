@@ -16,6 +16,20 @@ class _QRScanPageState extends State<QRScanPage> {
   final user = FirebaseAuth.instance.currentUser;
   bool processing = false;
 
+  bool _isGymDateToday(dynamic gymDate) {
+    if (gymDate == null) return false;
+    final today = DateTime.now();
+    final todayStr = DateFormat('yyyy-MM-dd').format(today);
+    final s = gymDate.toString();
+
+    if (s == todayStr || s.startsWith(todayStr)) return true;
+
+    final dt = DateTime.tryParse(s);
+    if (dt == null) return false;
+
+    return dt.year == today.year && dt.month == today.month && dt.day == today.day;
+  }
+
   // ================= CARI BOOKING HARI INI =================
   Future<DatabaseReference?> _getTodayBookingRef() async {
     if (user == null) return null;
@@ -24,11 +38,22 @@ class _QRScanPageState extends State<QRScanPage> {
     final ref = FirebaseDatabase.instance.ref("bookings/${user!.uid}");
 
     final snap = await ref.orderByChild("gym_date").equalTo(today).get();
-    if (!snap.exists) return null;
+    if (snap.exists) {
+      for (var b in snap.children) {
+        final data = Map<String, dynamic>.from(b.value as Map);
+        if (_isGymDateToday(data["gym_date"]) && data["status"] != "Batal") {
+          return b.ref;
+        }
+      }
+    }
 
-    for (var b in snap.children) {
+    // Fallback scan: gym_date bisa saja tersimpan dengan format lain.
+    final allSnap = await ref.get();
+    if (!allSnap.exists) return null;
+
+    for (var b in allSnap.children) {
       final data = Map<String, dynamic>.from(b.value as Map);
-      if (data["status"] != "Batal") {
+      if (_isGymDateToday(data["gym_date"]) && data["status"] != "Batal") {
         return b.ref;
       }
     }

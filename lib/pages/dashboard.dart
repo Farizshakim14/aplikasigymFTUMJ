@@ -108,8 +108,10 @@ class _DashboardPageState extends State<DashboardPage> {
     setState(() => loadingChart = false);
   }
 
-  void _selectPage(String page) {
-    Navigator.of(context).maybePop();
+  void _selectPage(String page, {bool fromDrawer = false}) {
+    if (fromDrawer) {
+      Navigator.pop(context);
+    }
     if (!mounted) return;
     setState(() => _selectedPage = page);
   }
@@ -413,7 +415,7 @@ class _DashboardPageState extends State<DashboardPage> {
                     _actionButton(
                       Icons.qr_code,
                       "Absensi",
-                      "Masuk ke halaman absensi",
+                      "absensi/kehadiran latihan",
                       () {
                         Navigator.push(
                           context,
@@ -425,15 +427,15 @@ class _DashboardPageState extends State<DashboardPage> {
                     ),
 
                     _actionButton(Icons.menu_book, "Panduan",
-                        "Panduan Penggunaan",
+                        "Panduan Latihan/tutorial latihan",
                         () => _selectPage("Panduan")),
 
                     _actionButton(Icons.thumb_up,
-                        "Rekomendasi", "Saran Latihan",
+                        "Rekomendasi", "Rekomendasi Nutrisi dan Aktivitas fisik",
                         () => _selectPage("Rekomendasi")),
 
                     _actionButton(Icons.bar_chart,
-                        "Statistik", "Lihat grafik",
+                        "Statistik", "Lihat grafik kehadiran latihan harian",
                         () => _selectPage("Statistik")),
 
                     _actionButton(Icons.info, "Tentang",
@@ -516,7 +518,7 @@ class _DashboardPageState extends State<DashboardPage> {
     return ListTile(
       leading: Icon(icon),
       title: Text(title),
-      onTap: () => _selectPage(title),
+      onTap: () => _selectPage(title, fromDrawer: true),
     );
   }
 }
