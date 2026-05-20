@@ -1,0 +1,170 @@
+[
+    {
+        "Gender": "Male",
+        "Goal": "bulking",
+        "BMI Category": "Underweight",
+        "Exercise Schedule": "Fokus pada Hipertrofi Otot. Angkat beban berat 4x seminggu, minimalisasi kardio.",
+        "Meal Plan": "Tinggi Kalori Surplus (500 kcal). Perbanyak protein dari telur, daging sapi, susu penuh lemak, alpukat, dan karbohidrat padat."
+    },
+    {
+        "Gender": "Male",
+        "Goal": "cutting",
+        "BMI Category": "Underweight",
+        "Exercise Schedule": "Kardio ringan dan latihan resistensi dasar. (Tidak disarankan defisit terlalu jauh).",
+        "Meal Plan": "Defisit kalori kecil (-200 kcal). Pertahankan asupan protein untuk mencegah penyusutan otot, konsumsi dada ayam dan putih telur."
+    },
+    {
+        "Gender": "Male",
+        "Goal": "maintain",
+        "BMI Category": "Underweight",
+        "Exercise Schedule": "Latihan kebugaran umum 3x seminggu dan jalan santai 5000 langkah.",
+        "Meal Plan": "Makan sesuai TDEE (Maintenance). Nutrisi seimbang: Nasi, dada ayam/ikan, sayur dan buah segar."
+    },
+    {
+        "Gender": "Male",
+        "Goal": "bulking",
+        "BMI Category": "Normal weight",
+        "Exercise Schedule": "Latihan Beban (Compound Movements) 4-5x seminggu, kardio ringan 15 menit.",
+        "Meal Plan": "Surplus kalori sedang (300 kcal). Dada ayam, nasi putih/merah, putih telur, whey protein, dan kacang-kacangan."
+    },
+    {
+        "Gender": "Male",
+        "Goal": "cutting",
+        "BMI Category": "Normal weight",
+        "Exercise Schedule": "Latihan Beban 3-4x seminggu + Kardio LISS 30-45 menit setiap hari.",
+        "Meal Plan": "Defisit kalori (-300-500 kcal). Makanan berserat tinggi, sayuran hijau, dada ayam bakar, ikan tuna, dan air putih banyak."
+    },
+    {
+        "Gender": "Male",
+        "Goal": "maintain",
+        "BMI Category": "Normal weight",
+        "Exercise Schedule": "Kombinasi angkat beban 3x seminggu dan kardio santai 2x seminggu.",
+        "Meal Plan": "Kalori pas sesuai TDEE. Gizi seimbang: dada ayam, telur, beras merah, brokoli, alpukat."
+    },
+    {
+        "Gender": "Male",
+        "Goal": "bulking",
+        "BMI Category": "Overweight",
+        "Exercise Schedule": "Latihan Beban intensif dengan superset. Kardio HIIT 20 menit pasca latihan.",
+        "Meal Plan": "Surplus kalori tipis / Recomp. Fokus protein sangat tinggi, kurangi karbohidrat olahan. Daging ayam tanpa lemak, sayur hijau."
+    },
+    {
+        "Gender": "Male",
+        "Goal": "cutting",
+        "BMI Category": "Overweight",
+        "Exercise Schedule": "Kardio HIIT 3x seminggu, latihan kekuatan otot perut dan tubuh utama 3x seminggu.",
+        "Meal Plan": "Defisit kalori moderat. Ganti nasi dengan karbo kompleks (ubi, oat). Protein dari ayam/ikan, hindari gorengan."
+    },
+    {
+        "Gender": "Male",
+        "Goal": "maintain",
+        "BMI Category": "Overweight",
+        "Exercise Schedule": "Olahraga 4x seminggu, perbanyak jalan kaki harian (8000 langkah).",
+        "Meal Plan": "Makan sesuai TDEE namun pilih makanan rendah lemak dan tinggi serat. Sayur-sayuran, ikan panggang."
+    },
+    {
+        "Gender": "Male",
+        "Goal": "bulking",
+        "BMI Category": "Obesity",
+        "Exercise Schedule": "Latihan sirkuit (Circuit Training) digabung angkat beban, usahakan bergerak aktif.",
+        "Meal Plan": "Protein tinggi dengan karbohidrat minimal. Telur rebus, sayuran, dan protein shake tanpa gula tambahan."
+    },
+    {
+        "Gender": "Male",
+        "Goal": "cutting",
+        "BMI Category": "Obesity",
+        "Exercise Schedule": "Kardio Low Impact (Berenang, Bersepeda statis, Jalan cepat 10.000 langkah).",
+        "Meal Plan": "Defisit kalori tegas. Sayuran porsi besar, buah-buahan berserat, dada ayam rebus/panggang, hindari sama sekali gula cair."
+    },
+    {
+        "Gender": "Male",
+        "Goal": "maintain",
+        "BMI Category": "Obesity",
+        "Exercise Schedule": "Aktivitas fisik ringan harian, peregangan, dan kardio aman (sepeda/renang).",
+        "Meal Plan": "Makan tepat sesuai TDEE, sangat hindari kalori kosong dari minuman manis atau makanan ringan manis."
+    },
+    {
+        "Gender": "Female",
+        "Goal": "bulking",
+        "BMI Category": "Underweight",
+        "Exercise Schedule": "Fokus pada Hipertrofi Otot. Angkat beban berat 4x seminggu, minimalisasi kardio.",
+        "Meal Plan": "Tinggi Kalori Surplus (500 kcal). Perbanyak protein dari telur, daging sapi, susu penuh lemak, alpukat, dan karbohidrat padat."
+    },
+    {
+        "Gender": "Female",
+        "Goal": "cutting",
+        "BMI Category": "Underweight",
+        "Exercise Schedule": "Kardio ringan dan latihan resistensi dasar. (Tidak disarankan defisit terlalu jauh).",
+        "Meal Plan": "Defisit kalori kecil (-200 kcal). Pertahankan asupan protein untuk mencegah penyusutan otot, konsumsi dada ayam dan putih telur."
+    },
+    {
+        "Gender": "Female",
+        "Goal": "maintain",
+        "BMI Category": "Underweight",
+        "Exercise Schedule": "Latihan kebugaran umum 3x seminggu dan jalan santai 5000 langkah.",
+        "Meal Plan": "Makan sesuai TDEE (Maintenance). Nutrisi seimbang: Nasi, dada ayam/ikan, sayur dan buah segar."
+    },
+    {
+        "Gender": "Female",
+        "Goal": "bulking",
+        "BMI Category": "Normal weight",
+        "Exercise Schedule": "Latihan Beban (Compound Movements) 4-5x seminggu, kardio ringan 15 menit.",
+        "Meal Plan": "Surplus kalori sedang (300 kcal). Dada ayam, nasi putih/merah, putih telur, whey protein, dan kacang-kacangan."
+    },
+    {
+        "Gender": "Female",
+        "Goal": "cutting",
+        "BMI Category": "Normal weight",
+        "Exercise Schedule": "Latihan Beban 3-4x seminggu + Kardio LISS 30-45 menit setiap hari.",
+        "Meal Plan": "Defisit kalori (-300-500 kcal). Makanan berserat tinggi, sayuran hijau, dada ayam bakar, ikan tuna, dan air putih banyak."
+    },
+    {
+        "Gender": "Female",
+        "Goal": "maintain",
+        "BMI Category": "Normal weight",
+        "Exercise Schedule": "Kombinasi angkat beban 3x seminggu dan kardio santai 2x seminggu.",
+        "Meal Plan": "Kalori pas sesuai TDEE. Gizi seimbang: dada ayam, telur, beras merah, brokoli, alpukat."
+    },
+    {
+        "Gender": "Female",
+        "Goal": "bulking",
+        "BMI Category": "Overweight",
+        "Exercise Schedule": "Latihan Beban intensif dengan superset. Kardio HIIT 20 menit pasca latihan.",
+        "Meal Plan": "Surplus kalori tipis / Recomp. Fokus protein sangat tinggi, kurangi karbohidrat olahan. Daging ayam tanpa lemak, sayur hijau."
+    },
+    {
+        "Gender": "Female",
+        "Goal": "cutting",
+        "BMI Category": "Overweight",
+        "Exercise Schedule": "Kardio HIIT 3x seminggu, latihan kekuatan otot perut dan tubuh utama 3x seminggu.",
+        "Meal Plan": "Defisit kalori moderat. Ganti nasi dengan karbo kompleks (ubi, oat). Protein dari ayam/ikan, hindari gorengan."
+    },
+    {
+        "Gender": "Female",
+        "Goal": "maintain",
+        "BMI Category": "Overweight",
+        "Exercise Schedule": "Olahraga 4x seminggu, perbanyak jalan kaki harian (8000 langkah).",
+        "Meal Plan": "Makan sesuai TDEE namun pilih makanan rendah lemak dan tinggi serat. Sayur-sayuran, ikan panggang."
+    },
+    {
+        "Gender": "Female",
+        "Goal": "bulking",
+        "BMI Category": "Obesity",
+        "Exercise Schedule": "Latihan sirkuit (Circuit Training) digabung angkat beban, usahakan bergerak aktif.",
+        "Meal Plan": "Protein tinggi dengan karbohidrat minimal. Telur rebus, sayuran, dan protein shake tanpa gula tambahan."
+    },
+    {
+        "Gender": "Female",
+        "Goal": "cutting",
+        "BMI Category": "Obesity",
+        "Exercise Schedule": "Kardio Low Impact (Berenang, Bersepeda statis, Jalan cepat 10.000 langkah).",
+        "Meal Plan": "Defisit kalori tegas. Sayuran porsi besar, buah-buahan berserat, dada ayam rebus/panggang, hindari sama sekali gula cair."
+    },
+    {
+        "Gender": "Female",
+        "Goal": "maintain",
+        "BMI Category": "Obesity",
+        "Exercise Schedule": "Aktivitas fisik ringan harian, peregangan, dan kardio aman (sepeda/renang).",
+        "Meal Plan": "Makan tepat sesuai TDEE, sangat hindari kalori kosong dari minuman manis atau makanan ringan manis."
+    }
+]

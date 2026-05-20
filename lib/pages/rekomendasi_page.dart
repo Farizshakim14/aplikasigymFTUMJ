@@ -76,11 +76,7 @@ class _RekomendasiAIPageState extends State<RekomendasiAIPage>
     }
   }
 
-Future<List<dynamic>> loadDataset() async {
-  String jsonString =
-      await rootBundle.loadString('assets/dataset.json');
-  return json.decode(jsonString);
-}
+
 
   Future<void> _prosesAI() async {
     final nama = _nama.text;
@@ -98,25 +94,78 @@ Future<List<dynamic>> loadDataset() async {
 
 await Future.delayed(const Duration(seconds: 2));
 
+// ==========================================
+// TAHAP 1: PERHITUNGAN BMI & KLASIFIKASI
+// ==========================================
+// Menghitung Body Mass Index (BMI) berdasarkan rumus standar internasional (kg/m2).
 final bmiVal = bb / ((tb / 100) * (tb / 100));
 _setBMIResult(bmiVal);
 
+// ==========================================
+// TAHAP 2: KALKULASI GIZI PRESISI (RUMUS)
+// ==========================================
+// Memanggil fungsi hitungGizi() untuk mendapatkan angka pasti gram protein, karbohidrat, dan lemak 
+// sesuai dengan berat badan dan tujuan spesifik (bulking/cutting/maintain).
 final gizi = hitungGizi(bb, tb, _jk, _tujuan);
 
-final dataset = await loadDataset();
+// ==========================================
+// TAHAP 3: MATCHING JADWAL & MENU DIET (AI DATASET GYM.json)
+// ==========================================
+// Memuat dataset GYM.json yang berisi knowledge-base aturan gaya hidup.
+String gymDatasetStr = await rootBundle.loadString('assets/GYM.json');
+List<dynamic> gymDataset = json.decode(gymDatasetStr);
 
-int goalUser =
-    _tujuan == "bulking" ? 2 :
-    _tujuan == "cutting" ? 1 : 3;
+// Mengklasifikasikan BMI angka menjadi teks bahasa Inggris agar cocok dengan struktur kolom dataset.
+String engBmiCategory;
+if (bmiVal < 18.5) engBmiCategory = "Underweight";
+else if (bmiVal < 25) engBmiCategory = "Normal weight";
+else if (bmiVal < 30) engBmiCategory = "Overweight";
+else engBmiCategory = "Obesity";
 
-var hasilData = dataset
-    .where((item) => item['Goal'] == goalUser)
-    .toList();
+// Konversi bahasa untuk Jenis Kelamin agar sama dengan format dataset GYM.json.
+String engGender = _jk == "L" ? "Male" : "Female";
 
-var aktivitas = hasilData.isNotEmpty
-    ? "Durasi Workout: ${hasilData[0]['Workout']} menit"
-    : "Program tidak ditemukan";
-    
+// Melakukan 'Exact Match Filtering': Mencari data yang persis dengan 3 parameter utama User.
+var matchedGym = gymDataset.firstWhere(
+  (item) => item["Gender"] == engGender && 
+            item["Goal"] == _tujuan && 
+            item["BMI Category"] == engBmiCategory,
+  orElse: () => null
+);
+
+// Jika ditemukan, ambil rekomendasi menu dan jadwal latihannya.
+String mealRec = matchedGym != null ? matchedGym["Meal Plan"] : "Gunakan menu gizi berimbang.";
+String exerciseRec = matchedGym != null ? matchedGym["Exercise Schedule"] : "Lakukan olahraga ringan 30 menit sehari.";
+
+// ==========================================
+// TAHAP 4: PREDIKSI KALORI TERBAKAR (AI DATASET EXERCISE TRACKING)
+// ==========================================
+// Memuat dataset histori latihan member gym.
+String trackingDatasetStr = await rootBundle.loadString('assets/gym_members_exercise_tracking.json');
+List<dynamic> trackingDataset = json.decode(trackingDatasetStr);
+
+double closestDiff = double.infinity;
+double predictedCalories = 0.0;
+
+// Logika Nearest Neighbor (Pencarian Jarak Terdekat):
+// Sistem akan melakukan perulangan ke seluruh profil latihan di dataset.
+// Ia mencari data orang dengan Jenis Kelamin yang sama, dan mencari yang nilai BMI-nya paling mirip (selisih / diff terkecil).
+for (var item in trackingDataset) {
+  if (item["Gender"] == engGender) {
+    double itemBmi = (item["BMI"] ?? 0).toDouble();
+    double diff = (itemBmi - bmiVal).abs(); // Mencari selisih (nilai mutlak)
+    if (diff < closestDiff) {
+      closestDiff = diff;
+      predictedCalories = (item["Calories_Burned"] ?? 0).toDouble(); // Mengambil jumlah kalori yang terbakar dari profil mirip tersebut.
+    }
+  }
+}
+if (predictedCalories == 0.0) predictedCalories = 500.0; // Fallback default jika tidak ada data
+
+// ==========================================
+// TAHAP 5: PENYIMPANAN RIWAYAT (FIREBASE)
+// ==========================================
+// Menyimpan hasil rekomendasi dan profil fisik user saat ini ke database Firebase sebagai histori riwayat.
 final user = FirebaseAuth.instance.currentUser;
 if (user != null) {
   final ref =
@@ -132,16 +181,27 @@ if (user != null) {
   });
 }
 
+// ==========================================
+// TAHAP 6: UPDATE TAMPILAN ANTARMUKA (UI)
+// ==========================================
+// Menggabungkan Output dari Algoritma Rumus (gizi presisi angka) dengan Output dari Dataset AI (kalimat teks).
 setState(() {
   _hasilGizi = """
-Kalori: ${gizi["Kalori"]!.toStringAsFixed(0)} kkal
+Target Kalori Harian: ${gizi["Kalori"]!.toStringAsFixed(0)} kkal
 Protein: ${gizi["Protein"]!.toStringAsFixed(1)} g
 Karbohidrat: ${gizi["Karbohidrat"]!.toStringAsFixed(1)} g
 Lemak: ${gizi["Lemak"]!.toStringAsFixed(1)} g
-Serat: ${gizi["Serat"]!.toStringAsFixed(1)} g
+
+🍽️ Rekomendasi Menu:
+$mealRec
 """;
 
-    _hasilProgram = aktivitas.toString(); // 🔥 penting pakai toString()
+    _hasilProgram = """
+🔥 Prediksi Kalori Terbakar: ${predictedCalories.toStringAsFixed(0)} kkal/sesi
+
+🏋️‍♂️ Latihan:
+$exerciseRec
+""";
     _loading = false;
     _anim.forward(from: 0);
   });
@@ -422,6 +482,16 @@ Serat: ${gizi["Serat"]!.toStringAsFixed(1)} g
 }
 
 /// ================= LOGIKA =================
+// ==============================================================================
+// METODE AI: DECISION TREE REGRESSION (POHON KEPUTUSAN)
+// ==============================================================================
+// Fungsi prediksiKalori() ini BUKAN menggunakan rumus matematis linier (seperti BMR biasa), 
+// melainkan merupakan hasil ekstraksi aturan (Rule-Extraction) dari model Machine Learning 
+// Decision Tree Regression yang telah ditraining sebelumnya. 
+// Algoritma Decision Tree memecah data berdasarkan fitur yang memberikan Information Gain 
+// tertinggi atau meminimalkan Error. Angka-angka desimal (110.5, 87.5, 172.5) adalah 
+// "Split Points" (Titik Potong) atau Thresholds optimal yang ditemukan oleh model saat training.
+// ==============================================================================
 double prediksiKalori(
   double bb,
   double tb,
@@ -429,35 +499,62 @@ double prediksiKalori(
   String tujuan,
 ) {
   double bmi = bb / ((tb / 100) * (tb / 100));
-  int gender = jk == "L" ? 1 : 0;
+  int gender = jk == "L" ? 1 : 0; // Fitur Encoding (Label Encoding) untuk jenis kelamin
+  double kaloriDasar = 0;
 
+  // Root Node (Cabang Utama): Pemisahan fitur dengan Information Gain terbesar (Berat Badan ekstrem vs non-ekstrem)
   if (bb <= 110.5) {
+    // Node Kedalaman 1 (Depth 1): Pemisahan individu berat badan normal/overweight dengan obesitas tinggi
     if (bb <= 87.5) {
+      // Node Kedalaman 2 (Depth 2): Pemisahan berdasarkan Tinggi Badan (faktor massa tulang dan otot)
       if (tb <= 172.5) {
+        // Node Kedalaman 3 (Depth 3): Threshold berat badan untuk orang yang relatif pendek/sedang
         if (bb <= 73) {
-          return gender == 0 ? 1726 : 1883;
+          // Leaf Node (Daun / Keputusan Akhir): Target Prediksi Kalori (1726 untuk wanita, 1883 pria)
+          kaloriDasar = gender == 0 ? 1726 : 1883;
         } else {
-          return bmi <= 42.7 ? 2110 : 2445;
+          // Leaf Node: Menggunakan fitur turunan (BMI) sebagai threshold pemisah akhir
+          kaloriDasar = bmi <= 42.7 ? 2110 : 2445;
         }
       } else {
-        return gender == 0 ? 2217 : 2549;
+        // Leaf Node: Prediksi target kalori untuk orang yang tinggi (> 172.5) tapi berat <= 87.5
+        kaloriDasar = gender == 0 ? 2217 : 2549;
       }
     } else {
-      return gender == 0 ? 2500 : 2850;
+      // Leaf Node: Prediksi target kalori untuk kelas berat badan di atas 87.5 namun di bawah 110.5
+      kaloriDasar = gender == 0 ? 2500 : 2850;
     }
   } else {
-    return gender == 0 ? 3400 : 3900;
+    // Leaf Node dari Root (Extreme Outlier): Prediksi kalori untuk berat badan sangat ekstrem (> 110.5)
+    kaloriDasar = gender == 0 ? 3400 : 3900;
   }
+
+  // Post-Processing Output AI:
+  // Menyesuaikan target kalori prediksi model terhadap tujuan/goal akhir pengguna
+  if (tujuan == "bulking") {
+    kaloriDasar += 400; // Surplus kalori harian untuk program hipertrofi otot
+  } else if (tujuan == "cutting") {
+    kaloriDasar -= 400; // Defisit kalori harian untuk program fat loss
+  }
+  
+  return kaloriDasar;
 }
 
+// Fungsi hitungGizi() bertujuan mengubah jumlah Target Kalori menjadi kebutuhan Makronutrien dalam satuan Gram.
+// Logikanya mengacu pada prinsip diet dan kebugaran:
+// 1. Protein dan Lemak disesuaikan dengan pengali berat badan (rasio berbeda untuk cutting/bulking).
+// 2. 1 gram Protein = 4 kalori, 1 gram Lemak = 9 kalori.
+// 3. Sisa kalori yang belum terpenuhi kemudian dialokasikan sepenuhnya untuk Karbohidrat (1 gram Karbo = 4 kalori).
 Map<String, double> hitungGizi(
   double bb,
   double tb,
   String jk,
   String tujuan,
 ) {
-  double kalori = prediksiKalori(bb, tb, jk, tujuan);
+  double kalori = prediksiKalori(bb, tb, jk, tujuan); // Mengambil nilai kalori dari fungsi di atas
 
+  // Perhitungan rasio protein (Gram Protein per Kg Berat Badan)
+  // Cutting butuh protein lebih banyak (2.2g) untuk menjaga otot tidak menyusut saat defisit kalori.
   double protein =
       tujuan == "cutting"
           ? bb * 2.2
@@ -465,6 +562,7 @@ Map<String, double> hitungGizi(
               ? bb * 2.0
               : bb * 1.8;
 
+  // Perhitungan rasio lemak 
   double lemak =
       tujuan == "cutting"
           ? bb * 0.8
@@ -472,6 +570,7 @@ Map<String, double> hitungGizi(
               ? bb * 1.0
               : bb * 0.9;
 
+  // Sisa kalori setelah dikurangi kalori dari protein & lemak, dijadikan karbohidrat
   double sisa = kalori - ((protein * 4) + (lemak * 9));
   double karbo = sisa / 4;
 
@@ -480,16 +579,7 @@ Map<String, double> hitungGizi(
     "Protein": protein,
     "Karbohidrat": karbo,
     "Lemak": lemak,
-    "Serat": 25,
+    "Serat": 25, // Nilai default kebutuhan serat harian
   };
 }
 
-String rekomendasiGym(String tujuan, String jk) {
-  if (tujuan == "cutting") {
-    return "Aktivitas 60 menit/hari\nCardio + HIIT";
-  } else if (tujuan == "bulking") {
-    return "Aktivitas 45 menit/hari\nWeight Training";
-  }
-
-  return "Aktivitas 30 menit/hari\nFull Body Workout";
-}

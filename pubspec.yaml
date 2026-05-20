@@ -66,7 +66,8 @@ flutter:
     - assets/abs.jpg
     - assets/fotobackground.jpg
     - assets/logo-gym.png
-    - assets/dataset.json
+    - assets/GYM.json
+    - assets/gym_members_exercise_tracking.json
 
 flutter_icons:
   android: true
